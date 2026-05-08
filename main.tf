@@ -93,10 +93,15 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3" {
   }
 
   # Cifrado del servidor (PC-IAC-020)
-  server_side_encryption {
-    enabled  = true
-    key_type = "CUSTOMER_MANAGED_CMK"
-    key_arn  = each.value.kms_key_arn
+  # NOTA: No se puede usar server_side_encryption cuando hay kinesis_source_configuration
+  # porque el cifrado ya viene del Data Stream de origen
+  dynamic "server_side_encryption" {
+    for_each = length(each.value.kinesis_source_stream_arn) == 0 ? [1] : []
+    content {
+      enabled  = true
+      key_type = "CUSTOMER_MANAGED_CMK"
+      key_arn  = each.value.kms_key_arn
+    }
   }
 
   tags = merge(
@@ -163,10 +168,14 @@ resource "aws_kinesis_firehose_delivery_stream" "s3" {
   }
 
   # Cifrado del servidor (PC-IAC-020)
-  server_side_encryption {
-    enabled  = true
-    key_type = "CUSTOMER_MANAGED_CMK"
-    key_arn  = each.value.kms_key_arn
+  # NOTA: No se puede usar server_side_encryption cuando hay kinesis_source_configuration
+  dynamic "server_side_encryption" {
+    for_each = length(each.value.kinesis_source_stream_arn) == 0 ? [1] : []
+    content {
+      enabled  = true
+      key_type = "CUSTOMER_MANAGED_CMK"
+      key_arn  = each.value.kms_key_arn
+    }
   }
 
   tags = merge(
