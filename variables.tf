@@ -62,7 +62,7 @@ variable "firehose_streams" {
     - buffering_size: Tamaño del buffer en MB (1-128, default: 5)
     - buffering_interval: Intervalo del buffer en segundos (0-900, default: 300)
     - compression_format: Formato de compresión (UNCOMPRESSED, GZIP, ZIP, Snappy, HADOOP_SNAPPY)
-    - kms_key_arn: ARN de la llave KMS para cifrado (obligatorio para seguridad)
+    - kms_key_arn: ARN de la llave KMS para cifrado (opcional - si es null/vacío, usa encriptación por defecto del bucket)
     - role_arn: ARN del rol IAM para Firehose
     - cloudwatch_logging_enabled: Habilitar logging en CloudWatch (default: true)
     - log_group_name: Nombre del grupo de logs de CloudWatch (opcional)
@@ -80,7 +80,7 @@ variable "firehose_streams" {
     buffering_size             = optional(number, 5)
     buffering_interval         = optional(number, 300)
     compression_format         = optional(string, "GZIP")
-    kms_key_arn                = string
+    kms_key_arn                = optional(string, null)
     role_arn                   = string
     cloudwatch_logging_enabled = optional(bool, true)
     log_group_name             = optional(string, "")
@@ -110,13 +110,6 @@ variable "firehose_streams" {
       for k, v in var.firehose_streams : length(v.s3_bucket_arn) > 0
     ])
     error_message = "Cada stream debe tener un 's3_bucket_arn' definido."
-  }
-
-  validation {
-    condition = alltrue([
-      for k, v in var.firehose_streams : length(v.kms_key_arn) > 0
-    ])
-    error_message = "Cada stream debe tener un 'kms_key_arn' definido para cifrado (PC-IAC-020)."
   }
 
   validation {

@@ -14,7 +14,8 @@ resource "aws_cloudwatch_log_group" "firehose" {
 
   name              = each.value.log_group_name
   retention_in_days = 30
-  kms_key_id        = each.value.kms_key_arn # Cifrado en reposo (PC-IAC-020)
+  # Cifrado en reposo (PC-IAC-020) - Solo si se especifica KMS
+  kms_key_id        = each.value.kms_key_arn != null && each.value.kms_key_arn != "" ? each.value.kms_key_arn : null
 
   tags = merge(
     { Name = each.value.log_group_name },
@@ -75,8 +76,9 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3" {
     # Compresión
     compression_format = each.value.compression_format
 
-    # Cifrado en reposo con KMS (PC-IAC-020 - Obligatorio)
-    kms_key_arn = each.value.kms_key_arn
+    # Cifrado en reposo con KMS (PC-IAC-020) - Opcional
+    # Si no se especifica, Firehose usa la encriptación por defecto del bucket de destino
+    kms_key_arn = each.value.kms_key_arn != null && each.value.kms_key_arn != "" ? each.value.kms_key_arn : null
 
     # CloudWatch Logging
     dynamic "cloudwatch_logging_options" {
@@ -95,8 +97,9 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3" {
   # Cifrado del servidor (PC-IAC-020)
   # NOTA: No se puede usar server_side_encryption cuando hay kinesis_source_configuration
   # porque el cifrado ya viene del Data Stream de origen
+  # Solo se habilita si se especifica KMS y no hay kinesis_source_configuration
   dynamic "server_side_encryption" {
-    for_each = length(each.value.kinesis_source_stream_arn) == 0 ? [1] : []
+    for_each = length(each.value.kinesis_source_stream_arn) == 0 && each.value.kms_key_arn != null && each.value.kms_key_arn != "" ? [1] : []
     content {
       enabled  = true
       key_type = "CUSTOMER_MANAGED_CMK"
@@ -151,8 +154,9 @@ resource "aws_kinesis_firehose_delivery_stream" "s3" {
     # Compresión
     compression_format = each.value.compression_format
 
-    # Cifrado en reposo con KMS (PC-IAC-020 - Obligatorio)
-    kms_key_arn = each.value.kms_key_arn
+    # Cifrado en reposo con KMS (PC-IAC-020) - Opcional
+    # Si no se especifica, Firehose usa la encriptación por defecto del bucket de destino
+    kms_key_arn = each.value.kms_key_arn != null && each.value.kms_key_arn != "" ? each.value.kms_key_arn : null
 
     # CloudWatch Logging
     dynamic "cloudwatch_logging_options" {
@@ -169,8 +173,9 @@ resource "aws_kinesis_firehose_delivery_stream" "s3" {
 
   # Cifrado del servidor (PC-IAC-020)
   # NOTA: No se puede usar server_side_encryption cuando hay kinesis_source_configuration
+  # Solo se habilita si se especifica KMS y no hay kinesis_source_configuration
   dynamic "server_side_encryption" {
-    for_each = length(each.value.kinesis_source_stream_arn) == 0 ? [1] : []
+    for_each = length(each.value.kinesis_source_stream_arn) == 0 && each.value.kms_key_arn != null && each.value.kms_key_arn != "" ? [1] : []
     content {
       enabled  = true
       key_type = "CUSTOMER_MANAGED_CMK"
