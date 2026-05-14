@@ -30,6 +30,7 @@ locals {
       log_group_name             = length(config.log_group_name) > 0 ? config.log_group_name : "/aws/kinesisfirehose/${config.name}"
       log_stream_name            = length(config.log_stream_name) > 0 ? config.log_stream_name : "DestinationDelivery"
       kinesis_source_stream_arn  = config.kinesis_source_stream_arn
+      file_extension             = config.file_extension
       additional_tags            = config.additional_tags
     }
   }

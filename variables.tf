@@ -68,6 +68,7 @@ variable "firehose_streams" {
     - log_group_name: Nombre del grupo de logs de CloudWatch (opcional)
     - log_stream_name: Nombre del stream de logs (opcional)
     - kinesis_source_stream_arn: ARN del Kinesis Data Stream como fuente (opcional)
+    - file_extension: Extensión de archivo para los objetos en S3 (opcional, ej: ".json", ".parquet")
     - additional_tags: Tags adicionales específicos del stream
   EOT
 
@@ -86,6 +87,7 @@ variable "firehose_streams" {
     log_group_name             = optional(string, "")
     log_stream_name            = optional(string, "")
     kinesis_source_stream_arn  = optional(string, "")
+    file_extension             = optional(string, "")
     additional_tags            = optional(map(string), {})
   }))
 

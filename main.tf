@@ -69,6 +69,9 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3" {
     prefix              = each.value.s3_prefix
     error_output_prefix = each.value.s3_error_prefix
 
+    # Extensión de archivo (opcional)
+    file_extension = each.value.file_extension != "" ? each.value.file_extension : null
+
     # Configuración de buffering
     buffering_size     = each.value.buffering_size
     buffering_interval = each.value.buffering_interval
@@ -146,6 +149,9 @@ resource "aws_kinesis_firehose_delivery_stream" "s3" {
     # Prefijos de S3
     prefix              = each.value.s3_prefix
     error_output_prefix = each.value.s3_error_prefix
+
+    # Extensión de archivo (opcional)
+    file_extension = each.value.file_extension != "" ? each.value.file_extension : null
 
     # Configuración de buffering
     buffering_size     = each.value.buffering_size
