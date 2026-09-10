@@ -32,6 +32,11 @@ locals {
       kinesis_source_stream_arn  = config.kinesis_source_stream_arn
       file_extension             = config.file_extension
       additional_tags            = config.additional_tags
+      # Dynamic partitioning
+      dynamic_partitioning_enabled         = config.dynamic_partitioning_enabled
+      metadata_extraction_query            = config.metadata_extraction_query
+      metadata_extraction_engine           = config.metadata_extraction_engine
+      dynamic_partitioning_retry_duration  = config.dynamic_partitioning_retry_duration
     }
   }
 

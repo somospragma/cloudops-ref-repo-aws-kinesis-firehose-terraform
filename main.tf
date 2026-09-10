@@ -93,6 +93,34 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3" {
       }
     }
 
+    # Processing Configuration — MetadataExtraction para dynamic partitioning (opcional)
+    dynamic "processing_configuration" {
+      for_each = each.value.dynamic_partitioning_enabled && length(each.value.metadata_extraction_query) > 0 ? [1] : []
+      content {
+        enabled = true
+        processors {
+          type = "MetadataExtraction"
+          parameters {
+            parameter_name  = "MetadataExtractionQuery"
+            parameter_value = each.value.metadata_extraction_query
+          }
+          parameters {
+            parameter_name  = "JsonParsingEngine"
+            parameter_value = each.value.metadata_extraction_engine
+          }
+        }
+      }
+    }
+
+    # Dynamic Partitioning (opcional)
+    dynamic "dynamic_partitioning_configuration" {
+      for_each = each.value.dynamic_partitioning_enabled ? [1] : []
+      content {
+        enabled = true
+        retry_duration = each.value.dynamic_partitioning_retry_duration
+      }
+    }
+
     # S3 Backup deshabilitado por defecto (puede habilitarse según necesidad)
     s3_backup_mode = "Disabled"
   }

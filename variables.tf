@@ -89,6 +89,23 @@ variable "firehose_streams" {
     kinesis_source_stream_arn  = optional(string, "")
     file_extension             = optional(string, "")
     additional_tags            = optional(map(string), {})
+
+    # =========================================================================
+    # Dynamic Partitioning (opcional — default desactivado)
+    # Permite particionar objetos S3 por campos extraídos del JSON con JQ.
+    # Requiere destination = "extended_s3" y kinesis_source_stream_arn definido.
+    # =========================================================================
+    dynamic_partitioning_enabled = optional(bool, false)
+
+    # Lista de procesadores de MetadataExtraction para JQ.
+    # Cada entrada extrae campos del JSON para construir el prefijo dinámico.
+    # Ejemplo:
+    #   metadata_extraction_query = "{event_type:.event_type,year:.year,month:.month,day:.day}"
+    # El s3_prefix debe usar la sintaxis:
+    #   "prefix/!{partitionKeyFromQuery:event_type}/!{partitionKeyFromQuery:year}/..."
+    metadata_extraction_query    = optional(string, "")
+    metadata_extraction_engine   = optional(string, "JQ-1.6")  # JQ-1.6 o HIVE-JSON
+    dynamic_partitioning_retry_duration = optional(number, 300)
   }))
 
   default = {}
